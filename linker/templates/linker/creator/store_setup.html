@@ -1,0 +1,42 @@
+{% extends 'linker/creator/base.html' %}
+{% block title %}스토어 설정 | ShoppingHub{% endblock %}
+{% block content %}
+<style>
+.store-settings{max-width:760px;margin:0 auto}.store-settings h1{margin:0;color:var(--ink);font-size:30px}.settings-lead{margin:8px 0 26px;color:var(--muted);line-height:1.6}.settings-section{margin-top:16px;padding:22px}.settings-section h2{margin:0 0 18px;font-size:18px}.settings-fields{display:grid;gap:18px}.settings-field{display:block;color:#334155;font-size:13px;font-weight:800}.settings-field input:not([type=file]),.settings-field textarea{display:block;width:100%;margin-top:8px}.settings-field textarea{min-height:100px;padding:12px;resize:vertical}.settings-field input[type=file]{display:block;width:100%;margin-top:8px;padding:9px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:var(--ink);font:inherit}.field-help{display:block;margin-top:7px;color:var(--muted);font-size:12px;font-weight:400;line-height:1.55}.field-help code{padding:2px 5px;border-radius:5px;background:var(--soft);color:#315273;font-size:12px}.field-error{display:block;margin-top:6px;color:#b42318;font-size:12px;font-weight:400}.current-image{display:inline-flex;align-items:center;gap:10px;margin-top:10px;color:var(--muted);font-size:12px;font-weight:400}.current-image img{width:64px;height:64px;border-radius:9px;object-fit:cover;border:1px solid var(--line)}.visibility-field{display:flex;align-items:flex-start;gap:10px;font-weight:800}.visibility-field input{width:18px;height:18px;margin:1px 0 0;accent-color:var(--blue)}.settings-actions{display:flex;justify-content:flex-end;margin-top:20px}.settings-actions .btn{min-width:140px}@media(max-width:600px){.settings-section{padding:18px}.store-settings h1{font-size:26px}.settings-actions .btn{width:100%}}
+</style>
+<div class="store-settings">
+	<h1>새 Store 만들기</h1>
+	<p class="settings-lead">Store를 만들고 이미 연결된 SNS를 배정하세요. SNS OAuth를 다시 진행하지 않습니다.</p>
+	{% if step == 1 %}
+	<form method="post">
+		{% csrf_token %}<input type="hidden" name="step" value="1">{{ form.non_field_errors }}
+		<section class="panel settings-section"><h2>1. Store 이름</h2>
+			<label class="settings-field">{{ form.store_name.label }}{{ form.store_name }}{% for error in form.store_name.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</label>
+		</section>
+		<div class="settings-actions"><button class="btn" type="submit">다음</button></div>
+	</form>
+	{% else %}
+	<form method="post">
+		{% csrf_token %}<input type="hidden" name="step" value="2">
+		<section class="panel settings-section"><h2>2. {{ store_name }}에서 사용할 SNS</h2>
+			<p class="field-help">다른 Store에 연결된 계정을 선택하면 해당 Store에서 이 Store로 이동합니다.</p>
+			<div class="account-list">
+			{% for account in accounts %}
+				<label class="account-option"><input type="checkbox" name="account_ids" value="{{ account.pk }}" {% if account.pk|stringformat:'s' in selected_ids %}checked{% endif %}>
+					<span><strong>{{ account.get_platform_display }} · {% if account.platform == 'INSTAGRAM' and account.username %}@{{ account.username }}{% else %}{{ account.display_name|default:account.account_name }}{% endif %}</strong>
+					<small>현재 Store: {% if account.store %}{{ account.store.store_name }}{% else %}미배정{% endif %}</small></span>
+				</label>
+			{% empty %}<p class="field-help">아직 연결된 SNS가 없습니다. 나중에 채널에서 연결할 수 있어요.</p>{% endfor %}
+			</div>
+		</section>
+		{% if move_conflicts %}
+		<section class="panel settings-section move-confirm" role="alert"><h2>Store 이동 확인</h2>
+			{% for account in move_conflicts %}<p>{{ account.get_platform_display }} 계정은 현재 {{ account.store.store_name }} Store에 연결되어 있습니다. {{ store_name }} Store로 이동하시겠습니까?</p>{% endfor %}
+			<label><input type="checkbox" name="confirm_move" value="1"> 이동을 확인합니다</label>
+		</section>
+		{% endif %}
+		<div class="settings-actions"><a class="btn secondary" href="{% url 'creator_store_new' %}">이전</a><button class="btn" type="submit">Store 만들기</button></div>
+	</form>
+	{% endif %}
+</div>
+{% endblock %}

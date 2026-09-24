@@ -1,0 +1,27 @@
+{% extends "linker/creator/base.html" %}
+{% block title %}콘텐츠 상품 연결 | ShoppingHub{% endblock %}
+{% block content %}
+<style>
+.link-page{max-width:900px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}.link-card{padding:22px}.link-card h1,.link-card h2{margin:0;color:#0f172a}.link-card h1{font-size:30px;line-height:1.25}.link-card h2{font-size:18px}.link-lead{margin:10px 0 0;color:var(--muted);line-height:1.65}.link-form{display:grid;gap:14px;margin-top:20px}.link-form p{margin:0}.link-form label{display:block;margin-bottom:7px;color:#334155;font-size:13px;font-weight:900}.link-form select,.link-form input:not([type=checkbox]),.link-form textarea{width:100%;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:var(--ink);padding:11px 12px;font:inherit}.link-form input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue)}.link-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:4px}.content-summary{position:sticky;top:86px}.summary-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;color:var(--muted);font-size:13px}.summary-text{margin:16px 0 0;color:#334155;line-height:1.65}@media(max-width:820px){.link-page{grid-template-columns:1fr}.content-summary{position:static}.link-actions{display:grid}.link-actions .btn{width:100%}}
+</style>
+<div class="link-page">
+  <section class="panel link-card">
+    <p class="eyebrow" style="margin:0 0 8px;color:var(--blue);font-size:12px;font-weight:900;letter-spacing:.08em">PRODUCT LINK</p>
+    <h1>콘텐츠 상품 연결</h1>
+    <p class="link-lead">이 게시물에서 소개한 상품이나 상품묶음을 연결해 고객이 바로 찾을 수 있게 합니다.</p>
+    <form method="post" class="link-form">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="link-actions">
+        <a class="btn secondary" href="{% url 'shoppinghub_content_detail' content.pk %}">취소</a>
+        <button class="btn" type="submit">연결 저장</button>
+      </div>
+    </form>
+  </section>
+  <aside class="panel link-card content-summary">
+    <h2>연결할 게시물</h2>
+    <div class="summary-meta"><span>{{ content.social_account.get_platform_display }}</span><span>@{{ content.social_account.username|default:content.social_account.account_name }}</span></div>
+    <p class="summary-text">{{ content.caption|default:content.title|default:content.external_content_id|truncatechars:180 }}</p>
+  </aside>
+</div>
+{% endblock %}

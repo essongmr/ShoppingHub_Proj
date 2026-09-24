@@ -1,0 +1,187 @@
+{% extends "linker/creator/base.html" %}
+{% block title %}댓글 관리 | ShoppingHub{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <h1 style="margin-top:0;">댓글 관리</h1>
+
+  <form method="post" class="row" style="margin-bottom:16px;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="sync_comments">
+
+    <select name="account_id">
+      {% for a in accounts %}
+        {% if a.platform == 'INSTAGRAM' %}
+        <option value="{{ a.pk }}">
+          @{{ a.username|default:a.account_name }}
+        </option>
+        {% endif %}
+      {% endfor %}
+    </select>
+
+    <button class="btn" type="submit">새 댓글 확인</button>
+  </form>
+
+  <form method="get" class="row" style="margin-bottom:20px;">
+    <select name="platform">
+      <option value="">전체 SNS</option>
+      <option value="INSTAGRAM"
+        {% if selected_platform == 'INSTAGRAM' %}selected{% endif %}>
+        Instagram
+      </option>
+      <option value="YOUTUBE"
+        {% if selected_platform == 'YOUTUBE' %}selected{% endif %}>
+        YouTube
+      </option>
+    </select>
+
+    <select name="account">
+      <option value="">전체 계정</option>
+      {% for a in accounts %}
+      <option value="{{ a.pk }}"
+        {% if selected_account == a.pk %}selected{% endif %}>
+        @{{ a.username|default:a.account_name }}
+      </option>
+      {% endfor %}
+    </select>
+
+    <button type="submit">필터</button>
+  </form>
+</div>
+
+
+{% for c in comments %}
+<article class="card" style="margin-top:16px;padding:20px;">
+
+  <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <strong>
+      {{ c.social_content.social_account.get_platform_display }}
+      ·
+      @{{ c.social_content.social_account.username|default:c.social_content.social_account.account_name }}
+    </strong>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+
+      {% if c.decision_status == 'MATCHED' %}
+        <span class="badge">매칭됨</span>
+      {% elif c.decision_status == 'NOT_MATCHED' %}
+        <span class="badge gray">미매칭</span>
+      {% elif c.decision_status == 'EXCLUDED' %}
+        <span class="badge gray">제외됨</span>
+      {% elif c.decision_status == 'MANUAL' %}
+        <span class="badge gray">수동 처리</span>
+      {% else %}
+        <span class="badge gray">판정 대기</span>
+      {% endif %}
+
+      {% if c.processing_status == 'SUCCESS' %}
+        <span class="badge">처리 성공</span>
+      {% elif c.processing_status == 'FAILED' %}
+        <span class="badge warn">처리 실패</span>
+      {% elif c.processing_status == 'PROCESSING' %}
+        <span class="badge gray">처리 중</span>
+      {% else %}
+        <span class="badge gray">처리 대기</span>
+      {% endif %}
+
+    </div>
+  </div>
+
+
+  <div style="margin-top:16px;">
+    <div class="muted" style="font-size:12px;font-weight:700;">게시물</div>
+    <div style="margin-top:4px;">
+      {{ c.social_content.title|default:c.social_content.caption|default:c.social_content.external_content_id }}
+    </div>
+  </div>
+
+
+  <div style="margin-top:14px;">
+    <div class="muted" style="font-size:12px;font-weight:700;">작성자</div>
+    <div style="margin-top:4px;">
+      @{{ c.username|default:c.external_user_id|default:"알 수 없음" }}
+    </div>
+  </div>
+
+
+  <div style="margin-top:14px;">
+    <div class="muted" style="font-size:12px;font-weight:700;">댓글</div>
+    <div style="margin-top:5px;font-size:17px;font-weight:700;">
+      {{ c.comment_text }}
+    </div>
+  </div>
+
+
+  {% if c.response_logs.all %}
+  <div style="margin-top:16px;padding-top:14px;border-top:1px solid #e5e7eb;">
+    <div class="muted" style="font-size:12px;font-weight:700;margin-bottom:7px;">
+      자동 응답
+    </div>
+
+    {% for log in c.response_logs.all %}
+    <div style="margin-top:7px;">
+      {% if log.response_type == 'PRIVATE_REPLY' %}
+        <strong>DM</strong>
+      {% else %}
+        <strong>공개 답글</strong>
+      {% endif %}
+
+      {% if log.status == 'SUCCESS' %}
+        <span class="badge" style="margin-left:6px;">
+          {% if log.response_type == 'PRIVATE_REPLY' %}
+            DM 발송 완료
+          {% else %}
+            발송 완료
+          {% endif %}
+        </span>
+      {% elif log.status == 'FAILED' %}
+        <span class="badge warn" style="margin-left:6px;">발송 실패</span>
+      {% else %}
+        <span class="badge gray" style="margin-left:6px;">{{ log.status }}</span>
+      {% endif %}
+
+      {% if log.completed_at %}
+        <span class="muted" style="margin-left:8px;font-size:12px;">
+          {{ log.completed_at|date:"Y.m.d H:i" }}
+        </span>
+      {% endif %}
+
+      {% if log.response_rule %}
+        <span class="muted" style="margin-left:8px;font-size:12px;">
+          Rule #{{ log.response_rule.pk }}
+        </span>
+      {% endif %}
+
+      {% if log.error_message %}
+        <div style="margin-top:5px;color:#b91c1c;font-size:12px;">
+          {{ log.error_message }}
+        </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+
+  <div style="margin-top:16px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:12px;color:#64748b;">
+    댓글
+    {% if c.commented_at %}
+      {{ c.commented_at|date:"Y.m.d H:i" }}
+    {% else %}
+      {{ c.received_at|date:"Y.m.d H:i" }}
+    {% endif %}
+    · 수집 {{ c.received_at|date:"Y.m.d H:i" }}
+  </div>
+
+</article>
+
+{% empty %}
+
+<div class="card" style="margin-top:16px;">
+  <p>댓글이 없습니다.</p>
+</div>
+
+{% endfor %}
+
+{% endblock %}

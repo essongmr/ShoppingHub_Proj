@@ -1,0 +1,77 @@
+{% extends 'linker/creator/base.html' %}
+{% block title %}{% if is_edit %}상품블록 수정{% else %}상품블록 만들기{% endif %} | ShoppingHub{% endblock %}
+{% block content %}
+<style>
+.block-flow{max-width:1120px;margin:auto;display:grid;gap:22px}.block-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.block-kicker{margin:0 0 8px;color:#2563eb;font-size:12px;font-weight:900;letter-spacing:.08em}.block-head h1{margin:0;color:#0f172a;font-size:32px;line-height:1.2}.block-lead{margin:10px 0 0;color:#64748b;line-height:1.65}.guide{padding:16px 18px;background:#f8fafc;border:1px solid #dbe3ee;border-radius:12px;color:#334155;line-height:1.6}.guide strong{display:block;margin-bottom:4px;color:#172033}.block-panel{background:#fff;border:1px solid #dbe3ee;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,.04);padding:18px}.block-info{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:block;color:#334155;font-size:13px;font-weight:800}.field input,.field textarea,.field select{width:100%;margin-top:7px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#172033;padding:0 12px;font:inherit}.field input,.field select{height:46px}.field textarea{min-height:92px;padding-top:12px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{outline:3px solid #dbeafe;border-color:#2563eb}.block-hint{color:#64748b;font-size:13px;line-height:1.55;margin:8px 0 0}.block-select{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:18px}.select-pane{border:1px solid #e7edf4;border-radius:12px;padding:14px;background:#fbfdff}.pane-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}.pane-head h2{font-size:18px;margin:0}.filters{display:grid;grid-template-columns:1fr 150px;gap:8px;margin-bottom:12px}.block-list{display:grid;gap:10px;min-height:170px}.product-card{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px;border:1px solid #dbe3ee;border-radius:11px;background:#fff}.product-card.is-selected{background:#f8fafc}.product-card.is-hidden{display:none}.block-thumb{width:54px;height:54px;border-radius:10px;object-fit:cover;background:#eef2f7;display:grid;place-items:center;color:#94a3b8;font-size:12px;font-weight:800;overflow:hidden}.block-thumb img{width:100%;height:100%;object-fit:cover}.product-card strong,.product-card small{display:block}.product-card strong{color:#172033;line-height:1.35}.product-card small{color:#64748b;margin-top:4px;line-height:1.4}.add-btn,.remove-btn,.move-btn{border:1px solid #dbe3ee;background:#fff;color:#2563eb;border-radius:8px;min-width:36px;height:36px;cursor:pointer;font:inherit;font-weight:900}.add-btn:disabled{color:#94a3b8;background:#f1f5f9;cursor:not-allowed}.selected-tools{display:flex;gap:6px;align-items:center}.remove-btn{color:#b42318}.empty-note{color:#64748b;padding:18px 4px;margin:0}.block-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;flex-wrap:wrap}.block-btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:9px;background:#2563eb;color:#fff;padding:11px 14px;min-height:42px;text-decoration:none;font:inherit;font-weight:800;cursor:pointer}.block-btn.light{background:#eef3fa;color:#315273}.hidden-field{display:none}
+@media(max-width:860px){.block-head{flex-direction:column}.block-info,.block-select{grid-template-columns:1fr}.filters{grid-template-columns:1fr}.block-actions{flex-direction:column}.block-btn{width:100%}.select-pane{padding:12px}}
+</style>
+<div class="block-flow">
+  <header class="block-head">
+    <div><p class="block-kicker">08 / 상품묶음</p><h1>{% if is_edit %}상품묶음 수정{% else %}상품묶음 만들기{% endif %}</h1><p class="block-lead">여러 상품을 하나의 묶음으로 만들어 게시물에 연결하세요.</p></div>
+    <a class="block-btn light" href="{% url 'shoppinghub_products' %}">목록으로</a>
+  </header>
+  <section class="guide">
+    <strong>상품묶음이란?</strong>
+    여러 상품을 하나의 묶음으로 만들어 콘텐츠에 연결하는 기능입니다. 특히 하나의 동영상에서 여러 상품을 함께 소개할 때 유용합니다.
+    <p class="block-hint">Tip. 한 영상에 등장하는 상품들을 하나의 상품블록으로 묶어보세요.</p>
+    <p class="block-hint">예: 여름 데일리룩 영상 - 티셔츠, 팬츠, 가방을 하나의 상품블록에 담기</p>
+  </section>
+  <form method="post" class="block-panel" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="block-info">
+      <div>
+        <label class="field">상품묶음 번호{{ form.block_number }}{{ form.block_number.errors }}</label>
+        <label class="field">상품묶음 이름{{ form.title }}{{ form.title.errors }}</label>
+        <label class="field">짧은 소개{{ form.description }}{{ form.description.errors }}</label>
+      </div>
+      <div>
+        <label class="field">대표 이미지{{ form.representative_image }}{{ form.representative_image.errors }}</label>
+        <p class="block-hint">대표 이미지를 고르지 않으면 첫 번째 상품 이미지로 보여드려요.</p>
+        <div class="hidden-field">{{ form.store_category }}{{ form.display_order }}{{ form.store_visible }}</div>
+      </div>
+    </div>
+    <div class="block-select">
+      <section class="select-pane">
+        <div class="pane-head"><div><h2>내 항목</h2><p class="block-hint">상품, 레시피, 서비스를 함께 담을 수 있습니다.</p></div></div>
+        <select id="type-filter" aria-label="유형 필터"><option value="">전체</option><option value="PRODUCT">상품</option><option value="RECIPE">레시피</option><option value="SERVICE">서비스</option></select>
+        <div class="filters"><input class="input" id="product-search" placeholder="상품명 검색" type="search"><select id="category-filter" aria-label="카테고리 필터"><option value="">전체 카테고리</option></select></div>
+        <div class="block-list" id="available-products">
+          {% for product in products %}
+          <article class="product-card available{% if product.pk in selected_ids %} is-selected{% endif %}" data-id="{{ product.pk }}" data-title="{{ product.title }}" data-type="{{ product.item_type }}" data-category="{% if product.store_category %}{{ product.store_category.name }}{% endif %}">
+            <span class="block-thumb">{% if product.thumbnail_url %}<img src="{{ product.thumbnail_url }}" alt="">{% else %}상품{% endif %}</span>
+            <span><strong>{{ product.title }} <em>{{ product.get_item_type_display }}</em></strong><small>{% if product.store_category %}{{ product.store_category.name }} · {% endif %}{% if product.marketplace %}{{ product.marketplace.name }}{% else %}판매처 없음{% endif %}</small></span>
+            <button class="add-btn" type="button" {% if product.pk in selected_ids %}disabled{% endif %} aria-label="{{ product.title }} 추가">+</button>
+          </article>
+          {% empty %}<p class="empty-note">먼저 상품을 등록해주세요.</p>{% endfor %}
+        </div>
+      </section>
+      <section class="select-pane">
+        <div class="pane-head"><div><h2>이 상품묶음에 담을 상품</h2><p class="block-hint">선택한 순서대로 스토어에 보여드립니다.</p></div></div>
+        <div class="block-list" id="selected-products">
+          {% for product in products %}{% if product.pk in selected_ids %}
+          <article class="product-card selected" data-id="{{ product.pk }}">
+            <span class="block-thumb">{% if product.thumbnail_url %}<img src="{{ product.thumbnail_url }}" alt="">{% else %}상품{% endif %}</span>
+            <span><strong>{{ product.title }}</strong><small>선택됨</small></span>
+            <span class="selected-tools"><button class="move-btn" type="button" data-move="up" aria-label="위로">↑</button><button class="move-btn" type="button" data-move="down" aria-label="아래로">↓</button><button class="remove-btn" type="button" aria-label="{{ product.title }} 제거">×</button></span>
+            <input type="hidden" name="products" value="{{ product.pk }}">
+          </article>
+          {% endif %}{% endfor %}
+          <p class="empty-note" id="selected-empty">블록에 추가할 상품을 선택하세요.</p>
+        </div>
+      </section>
+    </div>
+    <div class="block-actions"><a class="block-btn light" href="{% url 'shoppinghub_products' %}">나중에 할게요</a><button class="block-btn" type="submit">{% if is_edit %}상품묶음 저장{% else %}상품묶음 만들기{% endif %}</button></div>
+  </form>
+</div>
+<script>
+(function(){var available=document.getElementById('available-products'),selected=document.getElementById('selected-products'),empty=document.getElementById('selected-empty'),search=document.getElementById('product-search'),filter=document.getElementById('category-filter'),typeFilter=document.getElementById('type-filter');if(!available||!selected)return;var selectedIds=new Set(Array.prototype.map.call(selected.querySelectorAll('[data-id]'),function(card){return card.dataset.id}));
+function thumbHtml(card){return card.querySelector('.block-thumb').outerHTML}function textHtml(card){return card.querySelector('span:nth-child(2)').outerHTML}
+function buildSelected(card){var article=document.createElement('article');article.className='product-card selected';article.dataset.id=card.dataset.id;article.innerHTML=thumbHtml(card)+textHtml(card)+'<span class="selected-tools"><button class="move-btn" type="button" data-move="up" aria-label="위로">↑</button><button class="move-btn" type="button" data-move="down" aria-label="아래로">↓</button><button class="remove-btn" type="button" aria-label="제거">×</button></span><input type="hidden" name="products" value="'+card.dataset.id+'">';return article}
+function sync(){selectedIds=new Set(Array.prototype.map.call(selected.querySelectorAll('.product-card'),function(card){return card.dataset.id}));available.querySelectorAll('.available').forEach(function(card){var picked=selectedIds.has(card.dataset.id);card.classList.toggle('is-selected',picked);card.querySelector('.add-btn').disabled=picked});if(empty)empty.style.display=selectedIds.size?'none':''}
+function bindSelected(){selected.querySelectorAll('.remove-btn').forEach(function(button){button.onclick=function(){button.closest('.product-card').remove();sync()}});selected.querySelectorAll('[data-move]').forEach(function(button){button.onclick=function(){var card=button.closest('.product-card');if(button.dataset.move==='up'&&card.previousElementSibling&&card.previousElementSibling.classList.contains('product-card'))selected.insertBefore(card,card.previousElementSibling);if(button.dataset.move==='down'&&card.nextElementSibling&&card.nextElementSibling.classList.contains('product-card'))selected.insertBefore(card.nextElementSibling,card);sync()}})}
+available.querySelectorAll('.available').forEach(function(card){var category=card.dataset.category;if(category&&!Array.prototype.some.call(filter.options,function(option){return option.value===category})){filter.add(new Option(category,category))}card.querySelector('.add-btn').addEventListener('click',function(){if(selectedIds.has(card.dataset.id))return;selected.appendChild(buildSelected(card));bindSelected();sync()})});
+function applyFilters(){var q=(search.value||'').toLowerCase(),cat=filter.value,type=typeFilter&&typeFilter.value;available.querySelectorAll('.available').forEach(function(card){var okText=(card.dataset.title||'').toLowerCase().indexOf(q)>-1,okCat=!cat||card.dataset.category===cat,okType=!type||card.dataset.type===type;card.classList.toggle('is-hidden',!(okText&&okCat&&okType))})}
+if(search)search.addEventListener('input',applyFilters);if(filter)filter.addEventListener('change',applyFilters);if(typeFilter)typeFilter.addEventListener('change',applyFilters);bindSelected();sync();applyFilters()})();
+</script>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends 'linker/creator/base.html' %}
+{% block title %}상품 등록 | ShoppingHub{% endblock %}
+{% block content %}
+<style>
+.product-flow{max-width:1080px;margin:auto;display:grid;gap:22px}.flow-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.flow-kicker{margin:0 0 8px;color:#2563eb;font-size:12px;font-weight:900;letter-spacing:.08em}.flow-head h1{margin:0;color:#0f172a;font-size:32px;line-height:1.2}.flow-head p{margin:10px 0 0;color:#64748b;line-height:1.65}.flow-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}.flow-main,.flow-card,.product-preview{background:#fff;border:1px solid #dbe3ee;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,.04)}.flow-main{display:grid;gap:16px;padding:18px}.flow-card{padding:18px}.flow-card h2{font-size:18px;margin:0 0 12px}.mode-tabs{display:flex;gap:8px;flex-wrap:wrap}.mode-tab{border:1px solid #dbe3ee;background:#fff;color:#526070;border-radius:999px;padding:10px 14px;cursor:pointer;font:inherit;font-weight:800}.mode-tab.active{background:#2563eb;border-color:#2563eb;color:#fff}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:block;color:#334155;font-size:13px;font-weight:800}.field input:not([type=checkbox]),.field select,.field textarea{width:100%;margin-top:7px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#172033;padding:0 12px;font:inherit}.field input:not([type=checkbox]),.field select{height:46px}.field input[type=checkbox]{width:auto;margin:0}.field textarea{min-height:96px;padding-top:12px;resize:vertical}.field input:not([type=checkbox]):focus,.field select:focus,.field textarea:focus{outline:3px solid #dbeafe;border-color:#2563eb}.help{margin:9px 0 0;color:#64748b;font-size:13px;line-height:1.55}.errorlist{margin:6px 0 0;padding:0;list-style:none;color:#b42318;font-size:12px}.flow-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}.flow-btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:9px;background:#2563eb;color:#fff;padding:11px 14px;min-height:42px;text-decoration:none;font:inherit;font-weight:800;cursor:pointer}.flow-btn.light{background:#eef3fa;color:#315273}.mode-panel.is-hidden{display:none}.product-preview{position:sticky;top:86px;padding:18px}.product-preview small{color:#64748b;font-weight:900}.preview-image{height:172px;border-radius:12px;background:#eef2f7;display:grid;place-items:center;color:#94a3b8;font-size:28px;margin:14px 0;overflow:hidden}.preview-image img{width:100%;height:100%;object-fit:cover}.product-preview h2{font-size:20px;margin:8px 0;color:#172033}.product-preview p{color:#64748b;line-height:1.6;margin:0}.required{color:#b42318}
+@media(max-width:860px){.flow-grid{grid-template-columns:1fr}.product-preview{position:static}.field-row{grid-template-columns:1fr}.flow-head{flex-direction:column}.flow-actions{flex-direction:column}.flow-btn{width:100%}}
+</style>
+<style>
+.image-field{min-width:0}.image-dropzone{display:grid;place-items:center;min-height:150px;margin-top:7px;padding:12px;border:2px dashed #cbd5e1;border-radius:12px;background:#f8fafc;color:#64748b;text-align:center;cursor:pointer;overflow:hidden}.image-dropzone.is-dragging,.image-dropzone:hover{border-color:#2563eb;background:#eff6ff}.image-dropzone.has-image{padding:0;border-style:solid}.image-dropzone img{width:100%;height:150px;object-fit:cover}.image-field input[type=file]{position:absolute;width:1px;height:1px;opacity:0}.image-remove{margin-top:8px;border:0;background:none;color:#b42318;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.typed-details{display:none;margin-top:16px;padding-top:16px;border-top:1px solid #e7edf4}.typed-details.is-visible{display:grid;gap:12px}.typed-details h3{margin:0;color:#172033;font-size:16px}
+</style>
+<div class="product-flow">
+  <header class="flow-head">
+    <div><p class="flow-kicker">08 / ITEM</p><h1>등록 항목 만들기</h1><p>상품, 레시피, 서비스를 Store에 등록하세요.</p></div>
+    <a class="flow-btn light" href="{% url 'shoppinghub_products' %}">목록으로</a>
+  </header>
+  <form method="post" class="flow-grid" enctype="multipart/form-data" id="product-form">
+    {% csrf_token %}
+    <input type="hidden" name="flow" value="single">
+    <main class="flow-main">
+      {{ form.non_field_errors }}
+      <section class="flow-card">
+        <h2>무엇을 등록하시나요?</h2>
+        <label class="field">{{ form.item_type.label }}{{ form.item_type }}{{ form.item_type.errors }}</label>
+      </section>
+      <section class="flow-card">
+        <h2>입력 방식 선택</h2>
+        <div class="mode-tabs" role="tablist" aria-label="상품 입력 방식">
+          <button class="mode-tab active" type="button" data-mode="url">URL로 자동 채우기</button>
+          <button class="mode-tab" type="button" data-mode="manual">직접 입력</button>
+        </div>
+      </section>
+      <section class="flow-card mode-panel" id="url-mode">
+        <h2>상품정보를 가져올 페이지 URL</h2>
+        <label class="field">상품정보를 가져올 페이지 URL<input name="source_product_url" value="{{ source_product_url|default:'' }}" placeholder="https://..."></label>
+        <p class="help">세상에 공개된 페이지에서 가져올 수 있는 정보를 자동으로 채워드립니다.</p>
+        <button class="flow-btn light" name="action" value="fetch_product_url" type="submit" formnovalidate>상품정보 가져오기</button>
+      </section>
+      <section class="flow-card">
+        <h2>상품정보</h2>
+        <div class="field-row">
+          <label class="field">{{ form.product_no.label }}{{ form.product_no }}{{ form.product_no.errors }}</label>
+          <label class="field">{{ form.title.label }}{{ form.title }}{{ form.title.errors }}</label>
+        </div>
+        <div class="field-row">
+          <div class="field image-field">
+            <span>대표이미지</span>
+            <label class="image-dropzone" id="image-dropzone" for="id_product_image"><span class="image-dropzone-copy">이미지를 클릭하거나 끌어놓으세요</span><img id="image-preview" alt="" hidden></label>
+            {{ form.product_image }}{{ form.product_image.errors }}{{ form.remove_product_image }}
+            <button class="image-remove" id="image-remove" type="button" hidden>이미지 삭제</button>
+            <p class="help">상품당 대표이미지 1개만 등록할 수 있습니다.</p>
+          </div>
+          <label class="field">{{ form.marketplace.label }}{{ form.marketplace }}{{ form.marketplace.errors }}</label>
+        </div>
+        <input type="hidden" name="imported_thumbnail_url" value="{{ source_thumbnail_url|default:'' }}">
+        <label class="field">외부 링크 {{ form.destination_url }}{{ form.destination_url.errors }}</label>
+        <p class="help">고객이 상품을 클릭하면 이동하는 최종 연결 주소입니다. 정확한 파트너스 링크를 입력해 주세요.</p>
+        <div class="field-row">
+          <label class="field">카테고리{{ form.store_category }}{{ form.store_category.errors }}</label>
+          <label class="field">진열 순서{{ form.display_order }}{{ form.display_order.errors }}</label>
+        </div>
+        <label class="field" style="display:flex;align-items:center;gap:8px;margin-top:13px">{{ form.store_visible }} Store에 공개</label>
+        <label class="field">{{ form.description.label }}{{ form.description }}{{ form.description.errors }}</label>
+        <div class="typed-details" id="recipe-fields">
+          <h3>레시피 정보</h3>
+          <label class="field">재료 *{{ form.ingredients }}{{ form.ingredients.errors }}</label>
+          <label class="field">만드는 법 *{{ form.instructions }}{{ form.instructions.errors }}</label>
+          <label class="field">요리 팁{{ form.tips }}</label>
+          <div class="field-row"><label class="field">인분{{ form.servings }}</label><label class="field">준비시간{{ form.prep_time }}</label></div>
+          <label class="field">조리시간{{ form.cook_time }}</label>
+        </div>
+        <div class="typed-details" id="service-fields">
+          <h3>서비스 정보</h3>
+          <label class="field">서비스 설명{{ form.service_description }}</label><label class="field">가격 안내{{ form.price_info }}</label>
+          <div class="field-row"><label class="field">이용/소요시간{{ form.duration }}</label><label class="field">예약/문의 링크{{ form.booking_url }}</label></div>
+          <label class="field">위치/이용 안내{{ form.location_info }}</label><label class="field">연락 안내{{ form.contact_info }}</label>
+        </div>
+      </section>
+      <div class="flow-actions">
+        <a class="flow-btn light" href="{% url 'shoppinghub_products' %}">나중에 할게요</a>
+        <button class="flow-btn" type="submit">상품 등록</button>
+      </div>
+    </main>
+    <aside class="product-preview">
+      <small>STORE PREVIEW</small>
+      <div class="preview-image" id="preview-image"><span>+</span></div>
+      <h2 id="preview-title">{{ form.title.value|default:'내 상품' }}</h2>
+      <p id="preview-description">{{ form.description.value|default:'상품을 등록하면 내 Store에서 고객에게 보여집니다.' }}</p>
+    </aside>
+  </form>
+</div>
+<script>
+var urlPanel=document.getElementById('url-mode');document.querySelectorAll('[data-mode]').forEach(function(button){button.addEventListener('click',function(){document.querySelectorAll('[data-mode]').forEach(function(item){item.classList.remove('active')});button.classList.add('active');if(urlPanel)urlPanel.classList.toggle('is-hidden',button.dataset.mode==='manual')})});
+var titleInput=document.getElementById('id_title'),descInput=document.getElementById('id_description'),imageInput=document.getElementById('id_product_image'),destInput=document.getElementById('id_destination_url'),dropzone=document.getElementById('image-dropzone'),preview=document.getElementById('image-preview'),removeButton=document.getElementById('image-remove'),removeField=document.getElementById('id_remove_product_image');
+var typeInput=document.getElementById('id_item_type'),recipeFields=document.getElementById('recipe-fields'),serviceFields=document.getElementById('service-fields');function updateType(){var value=typeInput&&typeInput.value;if(recipeFields)recipeFields.classList.toggle('is-visible',value==='RECIPE');if(serviceFields)serviceFields.classList.toggle('is-visible',value==='SERVICE');if(destInput)destInput.required=value==='PRODUCT'}if(typeInput){typeInput.addEventListener('change',updateType);updateType()}
+if(destInput){destInput.placeholder='https://...'}
+function renderPreview(){var title=document.getElementById('preview-title'),desc=document.getElementById('preview-description'),image=document.getElementById('preview-image');if(title)title.textContent=(titleInput&&titleInput.value.trim())||'내 상품';if(desc)desc.textContent=(descInput&&descInput.value.trim())||'상품을 등록하면 내 Store에서 고객에게 보여집니다.';if(image&&preview&&!preview.hidden){image.innerHTML='<img src="'+preview.src+'" alt="">'}else if(image){image.innerHTML='<span>+</span>'}}
+function showFile(file){if(!file||!file.type.match(/^image\//))return;var reader=new FileReader();reader.onload=function(){preview.src=reader.result;preview.hidden=false;dropzone.classList.add('has-image');removeButton.hidden=false;removeField.value='';renderPreview()};reader.readAsDataURL(file)}
+if(imageInput){imageInput.addEventListener('change',function(){showFile(imageInput.files[0])})}if(dropzone){['dragenter','dragover'].forEach(function(name){dropzone.addEventListener(name,function(event){event.preventDefault();dropzone.classList.add('is-dragging')})});['dragleave','drop'].forEach(function(name){dropzone.addEventListener(name,function(event){event.preventDefault();dropzone.classList.remove('is-dragging')})});dropzone.addEventListener('drop',function(event){var file=event.dataTransfer.files[0];if(file){var transfer=new DataTransfer();transfer.items.add(file);imageInput.files=transfer.files;showFile(file)}})}if(removeButton){removeButton.addEventListener('click',function(){imageInput.value='';preview.hidden=true;dropzone.classList.remove('has-image');removeButton.hidden=true;removeField.value='true';renderPreview()})}
+[titleInput,descInput].forEach(function(input){if(input)input.addEventListener('input',renderPreview)});renderPreview();
+</script>
+{% endblock %}

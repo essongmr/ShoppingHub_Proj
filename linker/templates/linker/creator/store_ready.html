@@ -1,0 +1,18 @@
+{% extends "linker/creator/base.html" %}
+{% block title %}Store 준비 완료 | ShoppingHub{% endblock %}
+{% block content %}
+<style>
+.ready-page{max-width:760px;margin:0 auto}.ready-card{padding:34px;text-align:center}.ready-mark{width:58px;height:58px;margin:0 auto 18px;border-radius:16px;background:#eaf2ff;color:var(--blue);display:grid;place-items:center;font-size:28px;font-weight:900}.ready-card h1{margin:0;color:#0f172a;font-size:32px;line-height:1.25}.ready-card p{margin:12px auto 0;max-width:520px;color:var(--muted);line-height:1.65}.ready-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:24px}@media(max-width:620px){.ready-card{padding:26px 18px}.ready-actions{display:grid}.ready-actions .btn{width:100%}}
+</style>
+<div class="ready-page">
+  <section class="panel ready-card">
+    <div class="ready-mark">✓</div>
+    <h1>Store 준비가 완료됐어요.</h1>
+    <p>이제 상품을 등록하고, SNS 게시물과 자동 DM 흐름을 연결할 수 있습니다.</p>
+    <div class="ready-actions">
+      <a class="btn" href="{% url 'shoppinghub_product_new' %}">첫 상품 등록</a>
+      <a class="btn secondary" href="{% url 'shoppinghub_home' %}">홈으로</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

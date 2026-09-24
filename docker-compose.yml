@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    volumes:
+      - shoppinghub_v2_pgdata:/var/lib/postgresql/data
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 3s
+  web:
+    build: .
+    command: sh -c "python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+    env_file: [.env]
+    volumes: [".:/app"]
+    ports: ["8001:8000"]
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    networks:
+      default:
+      estatehub_dev_net:
+        aliases:
+          - shoppinghub-v2-web  
+  worker:
+    build: .
+    command: celery -A config worker -l info
+    env_file: [.env]
+    volumes: [".:/app"]
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+volumes:
+  shoppinghub_v2_pgdata:
+networks:
+  estatehub_dev_net:
+    external: true

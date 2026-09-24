@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}ShoppingHub{% endblock %}</title>
+<style>
+:root{--blue:#2563eb;--blue-700:#1d4ed8;--ink:#172033;--muted:#64748b;--line:#dbe3ee;--soft:#f6f8fb;--good:#15803d;--warn:#9a3412}
+*{box-sizing:border-box}
+body{margin:0;background:#f7f9fc;color:var(--ink);font-family:Arial,"Noto Sans KR","Malgun Gothic",sans-serif}
+a{color:inherit}
+.top{position:sticky;top:0;z-index:20;background:#fffffff2;border-bottom:1px solid var(--line);backdrop-filter:saturate(160%) blur(8px)}
+.top-inner{max-width:1180px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;color:#0f172a;white-space:nowrap}
+.store-switcher{position:relative;display:flex;align-items:center;gap:8px}.store-label{color:var(--muted);font-size:12px;font-weight:800;white-space:nowrap}.store-switcher summary{cursor:pointer;list-style:none;min-width:170px;padding:11px 14px;border:1px solid #b8c9e8;border-radius:10px;background:#fff;color:#315273;font-size:14px;font-weight:800}.store-switcher summary::-webkit-details-marker{display:none}.store-menu{position:absolute;top:52px;left:0;z-index:30;min-width:240px;padding:8px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 30px rgba(15,23,42,.12)}.store-menu form{margin:0}.store-menu button,.store-menu a{display:block;width:100%;padding:9px 10px;border:0;background:#fff;color:#315273;text-align:left;text-decoration:none;font:inherit;cursor:pointer;border-radius:7px}.store-menu button:hover,.store-menu a:hover{background:#eef3fa}.store-menu .is-active{font-weight:800;color:var(--blue-700)}
+.top-inner>div:first-child{gap:14px!important}.store-switcher:before{content:'현재 스토어';color:var(--muted);font-size:12px;font-weight:800;white-space:nowrap}
+.brand-mark{width:30px;height:30px;border-radius:9px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:15px;font-weight:900}
+.nav{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.nav a,.nav button{color:#526070;text-decoration:none;padding:9px 10px;border-radius:8px;font:inherit;font-size:14px;line-height:1}
+.nav a{display:inline-flex;align-items:center}
+.nav button{border:0;background:transparent;cursor:pointer}
+.nav a:hover,.nav a.active,.nav button:hover{background:#eaf2ff;color:var(--blue-700)}
+.nav .logout{color:#7f1d1d}
+.main{max-width:1180px;margin:0 auto;padding:32px 24px 56px}
+.panel,.card{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,.04)}
+.panel{padding:18px}
+.message{margin-bottom:14px;color:#334155}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:9px;background:var(--blue);color:#fff;padding:11px 14px;min-height:42px;text-decoration:none;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--blue-700)}
+.btn.secondary{background:#eef3fa;color:#315273}
+.btn.secondary:hover{background:#e2eaf5}
+.badge{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;background:#e8f5ed;color:var(--good);font-size:12px;font-weight:800}
+.badge.gray{background:#f1f5f9;color:#64748b}
+.badge.warn{background:#fff7ed;color:var(--warn)}
+.muted{color:var(--muted)}
+.thumb{width:72px;height:72px;border-radius:10px;object-fit:cover;background:#eef2f7}
+.thumb.empty{display:grid;place-items:center;color:#94a3b8;font-weight:800}
+.field-label{display:block;color:#334155;font-size:13px;font-weight:800;margin-bottom:7px}
+.input,select,input[type=number]{width:100%;height:44px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:var(--ink);padding:0 12px;font:inherit}
+.input:focus,select:focus,input[type=number]:focus{outline:3px solid #dbeafe;border-color:var(--blue)}
+@media(max-width:800px){.top-inner{align-items:flex-start;flex-direction:column;padding:14px 16px}.nav{justify-content:flex-start;overflow-x:auto;width:100%;flex-wrap:nowrap;padding-bottom:2px}.nav a{flex:0 0 auto}.main{padding:24px 16px 44px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div style="display:flex;align-items:center;gap:10px;min-width:0"><a class="brand" href="{% url 'shoppinghub_home' %}"><span class="brand-mark">S</span><span>ShoppingHub</span></a>{% if active_store %}<details class="store-switcher"><summary>{{ active_store.store_name }} ▼</summary><div class="store-menu">{% for store_option in creator_stores %}<form method="post" action="{% url 'creator_store_switch' %}">{% csrf_token %}<input type="hidden" name="store_id" value="{{ store_option.pk }}"><input type="hidden" name="next" value="{{ request.path }}">{% if store_option.pk == active_store.pk %}<button class="is-active" type="submit">✓ {{ store_option.store_name }}</button>{% else %}<button type="submit">{{ store_option.store_name }}</button>{% endif %}</form>{% endfor %}<a href="{% url 'creator_store_new' %}">+ 새 스토어 추가</a></div></details>{% endif %}</div>
+    <nav class="nav" aria-label="ShoppingHub Creator">
+      <a class="{% if request.resolver_match.url_name == 'shoppinghub_home' %}active{% endif %}" href="{% url 'shoppinghub_home' %}">홈</a>
+      <a class="{% if request.resolver_match.url_name == 'shoppinghub_contents' %}active{% endif %}" href="{% url 'shoppinghub_contents' %}">게시물</a>
+      <a class="{% if request.resolver_match.url_name == 'shoppinghub_products' or request.resolver_match.url_name == 'shoppinghub_product_new' or request.resolver_match.url_name == 'shoppinghub_product_edit' or request.resolver_match.url_name == 'shoppinghub_block_new' or request.resolver_match.url_name == 'shoppinghub_block_edit' %}active{% endif %}" href="{% url 'shoppinghub_products' %}">상품</a>
+      <a class="{% if request.resolver_match.url_name == 'shoppinghub_comments' %}active{% endif %}" href="{% url 'shoppinghub_comments' %}">댓글</a>
+      <a class="{% if request.resolver_match.url_name == 'shoppinghub_display' %}active{% endif %}" href="{% url 'shoppinghub_display' %}">스토어 꾸미기</a>
+      <a class="{% if request.resolver_match.url_name == 'shoppinghub_auto_dm' %}active{% endif %}" href="{% url 'shoppinghub_auto_dm' %}">자동 DM</a>
+      <a class="{% if request.resolver_match.url_name == 'shoppinghub_stats' %}active{% endif %}" href="{% url 'shoppinghub_stats' %}">통계</a>
+      <a class="{% if request.resolver_match.url_name == 'creator_channels' or request.resolver_match.url_name == 'creator_accounts' %}active{% endif %}" href="{% url 'creator_channels' %}">SNS 연결</a>
+      <a class="{% if request.resolver_match.url_name == 'creator_store_new' %}active{% endif %}" href="{% url 'creator_store_new' %}">스토어 관리</a>
+      <a class="{% if request.resolver_match.url_name == 'creator_billing' %}active{% endif %}" href="{% url 'creator_billing' %}">요금제</a>
+      <form method="post" action="{% url 'logout' %}" style="margin:0">{% csrf_token %}<button class="logout" type="submit">로그아웃</button></form>
+    </nav>
+  </div>
+</header>
+<main class="main">
+  {% if messages %}{% for message in messages %}<div class="panel message">{{ message }}</div>{% endfor %}{% endif %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

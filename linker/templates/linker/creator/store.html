@@ -1,0 +1,46 @@
+{% extends "linker/creator/base.html" %}
+{% block title %}내 Store | ShoppingHub{% endblock %}
+{% block content %}
+<style>
+.store-page{display:grid;gap:22px}.store-hero{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:18px;align-items:stretch}.hero-copy,.store-preview{padding:22px}.hero-copy h1{margin:0;color:#0f172a;font-size:32px;line-height:1.2}.hero-copy p{margin:12px 0 0;color:var(--muted);line-height:1.65}.hero-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.store-preview{background:#0f172a;color:#fff;border-color:#0f172a}.store-preview small{color:#b6c4d8;font-weight:900}.store-preview h2{margin:12px 0 8px;font-size:22px}.store-preview p{margin:0;color:#d8e1ee;line-height:1.6}.product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.product-card{padding:14px;text-decoration:none}.product-thumb{height:150px;border-radius:10px;background:#eef2f7;display:grid;place-items:center;color:#94a3b8;font-weight:900;overflow:hidden}.product-thumb img{width:100%;height:100%;object-fit:cover}.product-card h3{margin:12px 0 6px;color:#172033;font-size:17px;line-height:1.35}.product-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}.empty-state{padding:42px 20px;text-align:center}.empty-state h2{margin:0}.empty-state p{margin:10px auto 18px;max-width:440px;color:var(--muted);line-height:1.6}@media(max-width:900px){.store-hero,.product-grid{grid-template-columns:1fr}.hero-actions .btn{width:100%}}
+</style>
+<div class="store-page">
+  <section class="store-hero">
+    <div class="panel hero-copy">
+      <p class="eyebrow" style="margin:0 0 8px;color:var(--blue);font-size:12px;font-weight:900;letter-spacing:.08em">MY STORE</p>
+      <h1>{{ store.store_name }} Store</h1>
+      <p>{{ store.tagline|default:'소개한 상품을 고객이 다시 찾을 수 있도록 한곳에 정리하세요.' }}</p>
+      <div class="hero-actions">
+        <a class="btn" href="{% url 'shoppinghub_product_new' %}">상품 등록</a>
+        <a class="btn secondary" href="{% url 'shoppinghub_display' %}">진열 관리</a>
+        <a class="btn secondary" href="{% url 'public_store' store.slug %}">공개 Store 보기</a>
+      </div>
+    </div>
+    <aside class="panel store-preview">
+      <small>PUBLIC ADDRESS</small>
+      <h2>shoppinghub / {{ store.slug }}</h2>
+      <p>상품, 레시피, 서비스를 공개 상태로 바꾸면 고객 Store에 표시됩니다.</p>
+    </aside>
+  </section>
+
+  <section>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
+      <h2 style="margin:0;color:#172033;font-size:20px">등록 상품</h2>
+      <a class="btn secondary" href="{% url 'shoppinghub_products' %}">전체 관리</a>
+    </div>
+    {% if products %}
+    <div class="product-grid">
+      {% for p in products %}
+      <a class="card product-card" href="{% url 'shoppinghub_product_edit' p.pk %}">
+        <span class="product-thumb">{% if p.display_image_url %}<img src="{{ p.display_image_url }}" alt="">{% elif p.thumbnail_url %}<img src="{{ p.thumbnail_url }}" alt="">{% else %}상품{% endif %}</span>
+        <h3>{{ p.title }}</h3>
+        <p>{% if p.store_category %}{{ p.store_category.name }} · {% endif %}{% if p.store_visible %}공개{% else %}비공개{% endif %}</p>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="panel empty-state"><h2>아직 상품이 없습니다.</h2><p>첫 상품을 등록하면 Store 미리보기와 자동 DM 연결에 사용할 수 있어요.</p><a class="btn" href="{% url 'shoppinghub_product_new' %}">첫 상품 등록</a></div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Django runtime
+media/
+staticfiles/
+*.log
+
+# Local DB / dumps
+*.sqlite3
+*.dump
+*.sql
+*.bak
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+tmp/
+temp/
+*.tmp
+
+# Environment variants / backups
+.env.*
+!.env.example
+
+# Backup archives
+*.zip
+*.tar
+*.tar.gz
+
+# Local generated artifacts
+outputs/
+generated/
+downloads/
+
+# Timestamped backup files
+*.bak_*

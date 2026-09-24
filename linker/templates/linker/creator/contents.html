@@ -1,0 +1,56 @@
+{% extends "linker/creator/base.html" %}
+{% block title %}게시물 관리 | ShoppingHub{% endblock %}
+{% block content %}
+<style>
+.contents-page{display:grid;gap:22px}.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.eyebrow{margin:0 0 8px;color:var(--blue);font-size:12px;font-weight:900;letter-spacing:.08em}.page-head h1{margin:0;color:#0f172a;font-size:32px;line-height:1.2}.page-head p{margin:10px 0 0;color:var(--muted);line-height:1.65}.tool-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.tool-panel{padding:18px}.tool-panel h2{margin:0 0 8px;font-size:18px}.tool-panel p{margin:0 0 14px;color:var(--muted);line-height:1.55}.inline-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;align-items:end}.feed-list{display:grid;gap:12px}.feed-card{display:grid;grid-template-columns:80px minmax(0,1fr) auto;gap:14px;align-items:center;padding:16px;text-decoration:none}.feed-thumb{width:80px;height:80px;border-radius:10px;background:#eef2f7;display:grid;place-items:center;color:#94a3b8;font-size:12px;font-weight:900;overflow:hidden}.feed-thumb img{width:100%;height:100%;object-fit:cover}.feed-title{margin:0;color:#172033;font-size:17px;font-weight:900;line-height:1.4}.feed-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;color:var(--muted);font-size:13px}.feed-actions{display:flex;gap:8px;align-items:center}.empty-state{padding:42px 20px;text-align:center}.empty-state h2{margin:0;color:#172033}.empty-state p{margin:10px auto 0;max-width:440px;color:var(--muted);line-height:1.6}@media(max-width:820px){.page-head{display:grid}.inline-form{grid-template-columns:1fr}.feed-card{grid-template-columns:56px minmax(0,1fr);align-items:start}.feed-thumb{width:56px;height:56px}.feed-actions{grid-column:1 / -1}.feed-actions .btn{width:100%}}
+</style>
+<div class="contents-page">
+  <header class="page-head">
+    <div>
+      <p class="eyebrow">06 / CONTENTS</p>
+      <h1>{{ store.store_name }} 게시물 관리</h1>
+      <p>SNS 게시물을 가져오고, 상품 연결이 필요한 콘텐츠를 빠르게 확인하세요.</p>
+    </div>
+    <a class="btn secondary" href="{% url 'shoppinghub_auto_dm' %}">자동 DM 설정</a>
+  </header>
+
+  <section class="tool-grid">
+    {% if youtube_accounts %}
+    <div class="panel tool-panel">
+      <h2>YouTube 게시물 동기화</h2>
+      <p>연결된 YouTube 채널의 최근 게시물을 ShoppingHub로 가져옵니다.</p>
+      <form method="post" class="inline-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="sync_youtube">
+        <label><span class="field-label">채널</span><select name="account_id" required>{% for a in youtube_accounts %}<option value="{{ a.pk }}">@{{ a.username|default:a.account_name }}</option>{% endfor %}</select></label>
+        <button class="btn" type="submit">동기화</button>
+      </form>
+    </div>
+    {% endif %}
+    <div class="panel tool-panel">
+      <h2>게시물 필터</h2>
+      <p>플랫폼이나 계정별로 콘텐츠를 좁혀서 볼 수 있습니다.</p>
+      <form method="get" class="inline-form">
+        <label><span class="field-label">SNS</span><select name="platform"><option value="">전체 SNS</option><option value="INSTAGRAM" {% if selected_platform == 'INSTAGRAM' %}selected{% endif %}>Instagram</option><option value="YOUTUBE" {% if selected_platform == 'YOUTUBE' %}selected{% endif %}>YouTube</option></select></label>
+        <label><span class="field-label">계정</span><select name="account"><option value="">전체 계정</option>{% for a in accounts %}<option value="{{ a.pk }}" {% if selected_account == a.pk %}selected{% endif %}>@{{ a.username|default:a.account_name }}</option>{% endfor %}</select></label>
+        <button class="btn secondary" type="submit">필터 적용</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="feed-list">
+    {% for item in items %}
+    <a class="card feed-card" href="{% url 'shoppinghub_content_detail' item.pk %}">
+      <span class="feed-thumb">{% if item.thumbnail_url %}<img src="{{ item.thumbnail_url }}" alt="">{% else %}POST{% endif %}</span>
+      <span>
+        <strong class="feed-title">{{ item.caption|default:item.title|default:item.external_content_id|truncatechars:90 }}</strong>
+        <span class="feed-meta"><span>{{ item.social_account.get_platform_display }}</span><span>@{{ item.social_account.username|default:item.social_account.account_name }}</span><span>{{ item.published_at|date:'Y.m.d H:i' }}</span><span>{{ item.status }}</span></span>
+      </span>
+      <span class="feed-actions"><span class="btn secondary">상세 보기</span></span>
+    </a>
+    {% empty %}
+    <div class="panel empty-state"><h2>게시물이 없습니다.</h2><p>SNS 채널을 연결한 뒤 게시물을 동기화하면 이곳에서 상품 연결과 댓글 흐름을 관리할 수 있어요.</p></div>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}
